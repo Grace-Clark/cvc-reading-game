@@ -1,0 +1,269 @@
+:root {
+  --bg: #f7f3ea;
+  --card: #ffffff;
+  --ink: #1f2937;
+  --muted: #6b7280;
+  --accent: #2563eb;
+  --accent-ink: #ffffff;
+  --good: #16a34a;
+  --good-soft: #dcfce7;
+  --bad: #dc2626;
+  --bad-soft: #fee2e2;
+  --line: #e5e7eb;
+  --radius: 18px;
+  --shadow: 0 4px 14px rgba(0,0,0,0.08);
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "Comic Sans MS", "Trebuchet MS", system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font);
+  min-height: 100vh;
+}
+
+#app {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 10px 20px 10px;
+}
+
+.screen { display: none; }
+.screen.active { display: block; }
+.hidden { display: none !important; }
+
+/* --- Title + Done shared --- */
+#screen-title, #screen-done {
+  text-align: center;
+  padding-top: 8vh;
+}
+
+h1 {
+  font-size: clamp(36px, 6vw, 56px);
+  margin: 0 0 12px;
+  letter-spacing: -0.02em;
+}
+.lede {
+  font-size: clamp(18px, 2.2vw, 22px);
+  color: var(--muted);
+  margin: 0 0 28px;
+}
+.hint {
+  font-size: 14px;
+  color: var(--muted);
+  margin-top: 20px;
+}
+.speaker-demo {
+  font-size: 18px;
+  background: var(--line);
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+/* --- Buttons --- */
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border-radius: 999px;
+  border: none;
+  font-weight: 600;
+  transition: transform 0.05s ease, background 0.15s;
+}
+button:active { transform: scale(0.97); }
+
+.primary {
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: clamp(18px, 2vw, 22px);
+  padding: 12px 32px;
+  box-shadow: var(--shadow);
+  display: block;
+  margin: 6px auto 0;
+}
+.primary:hover { background: #1d4ed8; }
+
+.ghost {
+  background: transparent;
+  color: var(--accent);
+  border: 2px solid var(--accent);
+  padding: 6px 14px;
+  font-size: 13px;
+  margin: 2px 0 6px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+.ghost:hover { background: #eff6ff; }
+
+/* --- Question header --- */
+.qhead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: 0.02em;
+  margin-bottom: 8px;
+}
+
+.prompt {
+  font-size: clamp(14px, 1.6vw, 18px);
+  color: var(--muted);
+  margin: 2px 0 2px;
+  font-weight: 500;
+}
+
+/* --- Target word (Part 1) --- */
+.target-word {
+  font-size: clamp(40px, 7vw, 72px);
+  font-weight: 800;
+  text-align: center;
+  letter-spacing: 0.02em;
+  margin: 0 0 2px;
+  color: var(--ink);
+  text-transform: lowercase;
+  line-height: 1.05;
+}
+
+/* --- Target picture (Part 2) --- */
+.target-pic {
+  /* Shrinks on short viewports so the 4 word buttons + Next still fit.
+     ~280px of vertical chrome is reserved for everything else on the screen. */
+  width: min(220px, calc(100vh - 380px), 60vw);
+  aspect-ratio: 1 / 1;
+  margin: 4px auto 2px;
+  background: var(--card);
+  border-radius: var(--radius);
+  border: 2px solid var(--line);
+  box-shadow: var(--shadow);
+  position: relative;
+  overflow: hidden;
+}
+.target-pic img {
+  position: absolute;
+  max-width: none;
+}
+
+/* --- Options grid (Part 1: 4 pictures) --- */
+/* Practice: 2 cards in a single row */
+.practice-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin: 6px auto 0;
+  width: min(560px, calc((100vh - 220px) * 8 / 3), 92vw);
+}
+.practice-grid .option {
+  /* Inherits .option styles from below */
+}
+
+.options-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin: 4px auto 0;
+  /* Cap the grid so it + the header above + Next button below fit without scrolling.
+     Each card = padding (12) + crop (4:3 of card width) + speaker row (34) = card_w*0.75 + 46.
+     Two rows + gap: grid_h ≈ card_w*1.5 + 102 = grid_w*0.75 + 87.
+     Reserve ~350px for header above the grid + Next button below.
+     Solving grid_w*0.75 + 87 = (100vh - 350) gives grid_w = (100vh - 437) * 4/3. */
+  width: min(520px, calc((100vh - 290px) * 4 / 3), 92vw);
+}
+
+.option {
+  background: var(--card);
+  border: 3px solid var(--line);
+  border-radius: var(--radius);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  transition: border-color 0.15s, transform 0.05s;
+}
+.option:hover:not(.locked) { border-color: var(--accent); }
+.option:active:not(.locked) { transform: scale(0.98); }
+.option.correct { border-color: var(--good); background: var(--good-soft); }
+.option.incorrect { border-color: var(--bad); background: var(--bad-soft); }
+.option.locked { cursor: default; }
+.option.dim { opacity: 0.55; }
+
+.option .crop {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+}
+.option .crop img {
+  position: absolute;
+  max-width: none;
+  pointer-events: none;
+}
+
+.option .row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+.option-speaker {
+  background: #eef2ff;
+  color: var(--accent);
+  border-radius: 999px;
+  width: 30px;
+  height: 30px;
+  font-size: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.option-speaker:hover { background: #e0e7ff; }
+
+/* --- Word grid (Part 2: 4 words) --- */
+.word-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin: 6px auto 0;
+  max-width: 560px;
+}
+
+.word-option {
+  background: var(--card);
+  border: 3px solid var(--line);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  transition: border-color 0.15s, transform 0.05s;
+}
+.word-option:hover:not(.locked) { border-color: var(--accent); }
+.word-option:active:not(.locked) { transform: scale(0.98); }
+.word-option.correct { border-color: var(--good); background: var(--good-soft); }
+.word-option.incorrect { border-color: var(--bad); background: var(--bad-soft); }
+.word-option.locked { cursor: default; }
+.word-option.dim { opacity: 0.55; }
+
+.word-text {
+  font-size: clamp(28px, 4vw, 42px);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/* --- Done screen --- */
+.final-score {
+  font-size: clamp(72px, 14vw, 140px);
+  font-weight: 800;
+  color: var(--accent);
+  margin: 16px 0 8px;
+}
