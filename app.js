@@ -60,9 +60,11 @@
   // ------- Cropping helper -------
   // Builds an absolutely-positioned <img> inside `el` (which must be position:relative,
   // overflow:hidden) so only the cropped region of the source image is visible.
-  // Percent units on the img are relative to the .crop container, which makes the math
-  // straightforward — unlike background-position-percent, which is relative to
-  // (container − image) and gives nonsense offsets when the image is larger.
+  //
+  // We also set `el.style.aspectRatio` to match the visible region's pixel aspect ratio
+  // once the source image has loaded. Without this, the container's CSS aspect-ratio
+  // (which is 4:3 by default) would force non-uniform x/y scaling on the inner img,
+  // producing a stretched picture whenever the visible region's aspect differs from 4:3.
   function applyCrop(el, image, crop) {
     const visW = 100 - crop.l - crop.r;
     const visH = 100 - crop.t - crop.b;
@@ -75,6 +77,15 @@
     img.style.left = `${(-crop.l / visW) * 100}%`;
     img.style.top = `${(-crop.t / visH) * 100}%`;
     el.appendChild(img);
+
+    const setAspect = () => {
+      if (!img.naturalWidth) return;
+      const visPxW = (visW / 100) * img.naturalWidth;
+      const visPxH = (visH / 100) * img.naturalHeight;
+      el.style.aspectRatio = `${visPxW} / ${visPxH}`;
+    };
+    if (img.complete && img.naturalWidth) setAspect();
+    else img.addEventListener("load", setAspect);
   }
 
   // ------- Practice rendering -------
