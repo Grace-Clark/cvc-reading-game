@@ -150,16 +150,24 @@ button:active { transform: scale(0.97); }
 }
 
 /* --- Options grid (Part 1: 4 pictures) --- */
-/* Practice: 2 cards in a single row */
+/* Practice: 2 cards anchored to the far left and right of the viewport.
+   Used as a webcam-mirroring check — the wide separation makes a
+   left/right mismatch unambiguous. The grid breaks out of #app's
+   1100px max-width to reach the screen edges. */
 .practice-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 14px;
-  margin: 6px auto 0;
-  width: min(560px, calc((100vh - 220px) * 8 / 3), 92vw);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  left: calc(50% - 50vw);
+  width: 100vw;
+  padding: 0 24px;
+  box-sizing: border-box;
+  margin: 6px 0 0;
 }
 .practice-grid .option {
-  /* Inherits .option styles from below */
+  flex: 0 0 auto;
+  width: min(240px, 30vw, calc((100vh - 220px) * 4 / 3));
 }
 
 .options-grid {
