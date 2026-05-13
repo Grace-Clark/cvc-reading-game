@@ -135,6 +135,7 @@
       startPart2();
       return;
     }
+    const firstEntry = state.p1Index === 0;
     showScreen("screen-part1");
     const q = QUESTIONS.part1[state.p1Index];
 
@@ -142,6 +143,12 @@
     $("p1-score").textContent = `Score: ${state.score}/${state.answered}`;
     $("p1-target").textContent = q.target;
     $("p1-next").classList.add("hidden");
+
+    // On first entry to Part 1 (right after the practice items), speak the
+    // direction so the child hears what to do.
+    if (firstEntry) {
+      setTimeout(() => speak("Listen to the words. Select the picture that matches the word."), 250);
+    }
 
     const grid = $("p1-options");
     grid.innerHTML = "";
@@ -383,6 +390,15 @@
       synth.speak(u);
     }
     renderPractice();
+  });
+
+  $("title-hear").addEventListener("click", () => {
+    speakSequence([
+      "Reading Game.",
+      "Instructions for caregivers.",
+      "This is a reading test for your child. Please don't help them. We want to see what they know on their own.",
+      "After each response, click Next to continue to the next question.",
+    ], 200);
   });
 
   $("pr-next").addEventListener("click", () => {

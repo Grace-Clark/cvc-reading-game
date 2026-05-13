@@ -39,7 +39,33 @@ html, body {
 /* --- Title + Done shared --- */
 #screen-title, #screen-done {
   text-align: center;
-  padding-top: 8vh;
+  padding-top: 4vh;
+}
+
+/* --- Caregiver instructions block on title screen --- */
+.caregiver-box {
+  background: var(--card);
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  text-align: left;
+  max-width: 540px;
+  margin: 14px auto 18px;
+  padding: 18px 22px;
+}
+.caregiver-heading {
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  color: var(--accent);
+  margin: 0 0 8px;
+}
+.caregiver-box p {
+  margin: 6px 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ink);
 }
 
 h1 {
