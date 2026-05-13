@@ -57,35 +57,17 @@
     if (synth) synth.cancel();
   }
 
-  // ------- Cropping helper -------
-  // Builds an absolutely-positioned <img> inside `el` (which must be position:relative,
-  // overflow:hidden) so only the cropped region of the source image is visible.
-  //
-  // We also set `el.style.aspectRatio` to match the visible region's pixel aspect ratio
-  // once the source image has loaded. Without this, the container's CSS aspect-ratio
-  // (which is 4:3 by default) would force non-uniform x/y scaling on the inner img,
-  // producing a stretched picture whenever the visible region's aspect differs from 4:3.
-  function applyCrop(el, image, crop) {
-    const visW = 100 - crop.l - crop.r;
-    const visH = 100 - crop.t - crop.b;
+  // ------- Picture helper -------
+  // Each option/picture is a standalone PNG in assets/words/. We simply place it
+  // inside `el` with object-fit: contain so it scales without distortion regardless
+  // of the source image's aspect ratio.
+  function showPicture(el, image) {
     el.innerHTML = "";
     const img = document.createElement("img");
-    img.src = `assets/${image}`;
+    img.src = `assets/words/${image}`;
     img.alt = "";
-    img.style.width = `${(100 / visW) * 100}%`;
-    img.style.height = `${(100 / visH) * 100}%`;
-    img.style.left = `${(-crop.l / visW) * 100}%`;
-    img.style.top = `${(-crop.t / visH) * 100}%`;
+    img.className = "pic";
     el.appendChild(img);
-
-    const setAspect = () => {
-      if (!img.naturalWidth) return;
-      const visPxW = (visW / 100) * img.naturalWidth;
-      const visPxH = (visH / 100) * img.naturalHeight;
-      el.style.aspectRatio = `${visPxW} / ${visPxH}`;
-    };
-    if (img.complete && img.naturalWidth) setAspect();
-    else img.addEventListener("load", setAspect);
   }
 
   // ------- Practice rendering -------
@@ -112,7 +94,7 @@
 
       const crop = document.createElement("div");
       crop.className = "crop";
-      applyCrop(crop, opt.image, opt.crop);
+      showPicture(crop, opt.image);
       card.appendChild(crop);
 
       card.addEventListener("click", () => handlePracticePick(card, opt, q));
@@ -175,7 +157,7 @@
 
       const crop = document.createElement("div");
       crop.className = "crop";
-      applyCrop(crop, opt.image, opt.crop);
+      showPicture(crop, opt.image);
       card.appendChild(crop);
 
       const row = document.createElement("div");
@@ -238,7 +220,7 @@
     $("p2-next").classList.add("hidden");
 
     const pic = $("p2-target");
-    applyCrop(pic, q.picture.image, q.picture.crop);
+    showPicture(pic, q.picture.image);
 
     const grid = $("p2-options");
     grid.innerHTML = "";
