@@ -8,6 +8,9 @@
     score: 0,
     answered: 0,
     total: QUESTIONS.part1.length + QUESTIONS.part2.length,
+    // Per-trial log used to build the end-of-game report.
+    // Each entry: { part: 1 | 2, target: string, chosen: string, correct: boolean }
+    answers: [],
   };
 
   // ------- Audio (Web Speech API) -------
@@ -180,6 +183,7 @@
     const isCorrect = opt.word === q.target;
     state.answered += 1;
     if (isCorrect) state.score += 1;
+    state.answers.push({ part: 1, target: q.target, chosen: opt.word, correct: isCorrect });
 
     const cards = document.querySelectorAll("#p1-options .option");
     cards.forEach((c) => {
@@ -243,6 +247,7 @@
     const isCorrect = word === q.target;
     state.answered += 1;
     if (isCorrect) state.score += 1;
+    state.answers.push({ part: 2, target: q.target, chosen: word, correct: isCorrect });
 
     const cards = document.querySelectorAll("#p2-options .word-option");
     cards.forEach((c) => {
@@ -271,6 +276,84 @@
     else if (pct >= 0.5) headline = "Good try!";
     $("done-headline").textContent = headline;
     $("done-detail").textContent = `You answered ${state.score} of ${state.total} correctly.`;
+    renderReport();
+  }
+
+  function renderReport() {
+    const missed = state.answers.filter((a) => !a.correct);
+    const reportEl = $("report");
+    reportEl.innerHTML = "";
+
+    if (missed.length === 0) {
+      const p = document.createElement("p");
+      p.className = "report-empty";
+      p.textContent = "No missed trials — every answer was correct!";
+      reportEl.appendChild(p);
+      return;
+    }
+
+    const heading = document.createElement("h3");
+    heading.className = "report-heading";
+    heading.textContent = `Missed trials (${missed.length})`;
+    reportEl.appendChild(heading);
+
+    const table = document.createElement("table");
+    table.className = "report-table";
+    table.innerHTML = `
+      <thead>
+        <tr><th>Trial</th><th>Word</th><th>Picked</th></tr>
+      </thead>
+      <tbody></tbody>
+    `;
+    const tbody = table.querySelector("tbody");
+    missed.forEach((a) => {
+      const tr = document.createElement("tr");
+      const partLabel = a.part === 1 ? "Part 1" : "Part 2";
+      tr.innerHTML = `
+        <td>${partLabel}</td>
+        <td class="report-word">${a.target}</td>
+        <td class="report-word report-wrong">${a.chosen}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+    reportEl.appendChild(table);
+
+    const copyBtn = document.createElement("button");
+    copyBtn.type = "button";
+    copyBtn.className = "ghost report-copy";
+    copyBtn.textContent = "Copy report";
+    copyBtn.addEventListener("click", async () => {
+      const lines = [
+        `CVC Reading Game — ${state.score}/${state.total} correct`,
+        `Date: ${new Date().toLocaleString()}`,
+        "",
+        "Missed trials:",
+        ...missed.map((a) => `  ${a.part === 1 ? "Part 1" : "Part 2"} — word: ${a.target} — picked: ${a.chosen}`),
+      ];
+      const text = lines.join("\n");
+      try {
+        await navigator.clipboard.writeText(text);
+        copyBtn.textContent = "Copied!";
+        setTimeout(() => (copyBtn.textContent = "Copy report"), 1500);
+      } catch {
+        copyBtn.textContent = "Press Ctrl+C";
+        const r = document.createRange();
+        const pre = document.createElement("pre");
+        pre.textContent = text;
+        pre.style.position = "fixed";
+        pre.style.left = "-9999px";
+        document.body.appendChild(pre);
+        r.selectNode(pre);
+        window.getSelection().removeAllRanges();
+        window.getSelection().addRange(r);
+        setTimeout(() => {
+          window.getSelection().removeAllRanges();
+          pre.remove();
+          copyBtn.textContent = "Copy report";
+        }, 3000);
+      }
+    });
+    reportEl.appendChild(copyBtn);
   }
 
   // ------- Utilities -------
@@ -289,6 +372,7 @@
     state.p2Index = 0;
     state.score = 0;
     state.answered = 0;
+    state.answers = [];
     // Reshuffle question order so each play-through has a fresh sequence.
     // (Practice order stays fixed: car first, then ball.)
     shuffle(QUESTIONS.part1);

@@ -270,8 +270,67 @@ button:active { transform: scale(0.97); }
 
 /* --- Done screen --- */
 .final-score {
-  font-size: clamp(72px, 14vw, 140px);
+  font-size: clamp(64px, 12vw, 120px);
   font-weight: 800;
   color: var(--accent);
-  margin: 16px 0 8px;
+  margin: 8px 0 4px;
+  line-height: 1;
+}
+
+/* --- End-of-game report --- */
+.report {
+  max-width: 520px;
+  margin: 12px auto 16px;
+  text-align: left;
+}
+.report-empty {
+  text-align: center;
+  color: var(--good);
+  font-weight: 600;
+  margin: 8px 0 0;
+}
+.report-heading {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 8px;
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--card);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  font-size: 15px;
+}
+.report-table thead {
+  background: #eef2ff;
+}
+.report-table th {
+  text-align: left;
+  padding: 8px 14px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  font-weight: 600;
+}
+.report-table td {
+  padding: 8px 14px;
+  border-top: 1px solid var(--line);
+}
+.report-word {
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.02em;
+}
+.report-wrong {
+  color: var(--bad);
+}
+.report-copy {
+  display: block;
+  margin: 12px auto 0;
 }
