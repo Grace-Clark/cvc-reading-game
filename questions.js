@@ -55,7 +55,7 @@ const QUESTIONS = {
         { word: "pen",  image: "pen.png" },
         { word: "pin",  image: "pin.png" },
         { word: "men",  image: "men.png" },
-        { word: "pegs", image: "pegs.png" }
+        { word: "peg", image: "peg.png" }
       ]
     },
     {
@@ -64,14 +64,14 @@ const QUESTIONS = {
         { word: "fish",    image: "fish.png" },
         { word: "fin",     image: "fin.png" },
         { word: "dish",    image: "dish.png" },
-        { word: "fidgets", image: "fidgets.png" }
+        { word: "koosh", image: "koosh.png" }
       ]
     },
     {
       target: "lid",
       options: [
         { word: "loud", image: "loud.png" },
-        { word: "lips", image: "lips.png" },
+        { word: "lip", image: "lip.png" },
         { word: "lid",  image: "lid.png" },
         { word: "kid",  image: "kid.png" }
       ]
