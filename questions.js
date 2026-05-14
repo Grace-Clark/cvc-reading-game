@@ -64,10 +64,12 @@ const QUESTIONS = {
         { word: "fish",    image: "fish.png" },
         { word: "fin",     image: "fin.png" },
         { word: "dish",    image: "dish.png" },
-        // The `speakAs` field overrides what speech synthesis says, when the default
-        // TTS pronunciation of `word` is wrong. "Cooosh" with extra o's encourages
-        // the TTS to use the long /uː/ vowel (the "oo" sound in "boo").
-        { word: "koosh", image: "koosh.png", speakAs: "cooosh" }
+        // The `speakAs` field overrides what speech synthesis says when the default
+        // TTS pronunciation of `word` is wrong. Most English TTS reads "oosh" as the
+        // short /ʊ/ vowel (like "bush, push"). "Kewsh" forces the long /uː/ vowel
+        // pattern that English TTS uses for "few, new" (close to "koosh" rhyming
+        // with "douche"). The tiny "y-glide" is a much smaller error than "kush".
+        { word: "koosh", image: "koosh.png", speakAs: "kewsh" }
       ]
     },
     {
