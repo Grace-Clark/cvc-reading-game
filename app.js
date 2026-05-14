@@ -168,8 +168,9 @@
       sp.setAttribute("aria-label", `Hear ${opt.word}`);
       sp.addEventListener("click", (e) => {
         e.stopPropagation();
-        speak(opt.word);
+        speak(opt.speakAs || opt.word);
       });
+      card.dataset.speakAs = opt.speakAs || opt.word;
       row.appendChild(sp);
       card.appendChild(row);
 
@@ -196,7 +197,10 @@
       if (correctCard) correctCard.classList.add("correct");
     }
 
-    speak(isCorrect ? `Yes! ${q.target}.` : `That was ${opt.word}. The word is ${q.target}.`);
+    const targetOpt = q.options.find((o) => o.word === q.target);
+    const sayChosen = opt.speakAs || opt.word;
+    const sayTarget = (targetOpt && targetOpt.speakAs) || q.target;
+    speak(isCorrect ? `Yes! ${sayTarget}.` : `That was ${sayChosen}. The word is ${sayTarget}.`);
     $("p1-score").textContent = `Score: ${state.score}/${state.answered}`;
     $("p1-next").classList.remove("hidden");
   }
@@ -415,10 +419,10 @@
   });
 
   $("p1-hear-all").addEventListener("click", () => {
-    const q = QUESTIONS.part1[state.p1Index];
     const cards = document.querySelectorAll("#p1-options .option");
-    // Speak whatever order they're currently rendered in
-    const order = Array.from(cards).map((c) => c.querySelector(".option-speaker").getAttribute("aria-label").replace(/^Hear /, ""));
+    // Speak whatever order they're currently rendered in, using each card's
+    // speakAs override (set in dataset) so e.g. "koosh" is pronounced correctly.
+    const order = Array.from(cards).map((c) => c.dataset.speakAs || c.dataset.word);
     speakSequence(order);
   });
 

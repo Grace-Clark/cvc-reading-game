@@ -64,7 +64,10 @@ const QUESTIONS = {
         { word: "fish",    image: "fish.png" },
         { word: "fin",     image: "fin.png" },
         { word: "dish",    image: "dish.png" },
-        { word: "koosh", image: "koosh.png" }
+        // The `speakAs` field overrides what speech synthesis says, when the default
+        // TTS pronunciation of `word` is wrong. "Cooosh" with extra o's encourages
+        // the TTS to use the long /uː/ vowel (the "oo" sound in "boo").
+        { word: "koosh", image: "koosh.png", speakAs: "cooosh" }
       ]
     },
     {
