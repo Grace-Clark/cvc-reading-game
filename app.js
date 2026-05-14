@@ -33,11 +33,22 @@
   function speak(text, opts = {}) {
     if (!synth) return Promise.resolve();
     synth.cancel();
+
+    // Words ending in /p/ (sheep, cap, chop, lip, etc.) often have the final
+    // consonant clipped by TTS. Slow the rate and append a period (if not already
+    // punctuated) so the engine articulates the stop clearly.
+    const trimmed = text.trim();
+    const letters = trimmed.match(/[a-zA-Z]/g) || [];
+    const lastLetter = (letters[letters.length - 1] || "").toLowerCase();
+    const endsInP = lastLetter === "p";
+    const speakText = endsInP && !/[.!?,;:]$/.test(trimmed) ? trimmed + "." : text;
+    const defaultRate = endsInP ? 0.7 : 0.85;
+
     return new Promise((resolve) => {
-      const u = new SpeechSynthesisUtterance(text);
+      const u = new SpeechSynthesisUtterance(speakText);
       if (voice) u.voice = voice;
       u.lang = "en-US";
-      u.rate = opts.rate ?? 0.85;
+      u.rate = opts.rate ?? defaultRate;
       u.pitch = opts.pitch ?? 1.05;
       u.onend = u.onerror = () => resolve();
       synth.speak(u);
