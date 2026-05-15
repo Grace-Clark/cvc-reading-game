@@ -62,6 +62,54 @@
     }
   }
 
+  // ------- Audio file overrides -------
+  // For each option word, try playing assets/audio/<word>.mp3 (then .m4a) before
+  // falling back to TTS. This lets the user provide hand-recorded pronunciation
+  // for words the synthesizer mangles. Results are cached so we only check for
+  // a missing file once per word per session.
+  const audioCache = new Map(); // word -> "mp3" | "m4a" | "none"
+  let currentAudio = null;
+
+  function stopAllAudio() {
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+      currentAudio = null;
+    }
+    if (synth) synth.cancel();
+  }
+
+  function tryPlayUrl(url) {
+    return new Promise((resolve, reject) => {
+      const audio = new Audio(url);
+      audio.addEventListener("ended", () => resolve(true));
+      audio.addEventListener("error", () => reject());
+      audio.play()
+        .then(() => { currentAudio = audio; })
+        .catch(reject);
+    });
+  }
+
+  async function playWord(word, ttsText, ttsOpts) {
+    stopAllAudio();
+    const cached = audioCache.get(word);
+    if (cached === "none") {
+      return speak(ttsText, ttsOpts);
+    }
+    const exts = cached ? [cached] : ["mp3", "m4a"];
+    for (const ext of exts) {
+      try {
+        await tryPlayUrl(`assets/audio/${word}.${ext}`);
+        audioCache.set(word, ext);
+        return;
+      } catch {
+        /* try next */
+      }
+    }
+    audioCache.set(word, "none");
+    return speak(ttsText, ttsOpts);
+  }
+
   // ------- Screen switching -------
   function showScreen(id) {
     document.querySelectorAll(".screen").forEach((s) => s.classList.remove("active"));
@@ -180,7 +228,7 @@
       sp.setAttribute("aria-label", `Hear ${opt.word}`);
       sp.addEventListener("click", (e) => {
         e.stopPropagation();
-        speak(opt.speakAs || opt.word, opt.speakOpts || {});
+        playWord(opt.word, opt.speakAs || opt.word, opt.speakOpts || {});
       });
       card.dataset.speakAs = opt.speakAs || opt.word;
       if (opt.speakOpts) card.dataset.speakOpts = JSON.stringify(opt.speakOpts);
@@ -433,19 +481,20 @@
 
   $("p1-hear-all").addEventListener("click", async () => {
     const cards = document.querySelectorAll("#p1-options .option");
-    // Speak whatever order they're currently rendered in, using each card's
-    // speakAs override and speakOpts (e.g. so "lip" skips the /p/ slowdown).
+    // Speak whatever order they're currently rendered in, preferring recorded
+    // audio files when available (assets/audio/<word>.mp3) and falling back to TTS.
     for (const c of cards) {
-      const text = c.dataset.speakAs || c.dataset.word;
+      const word = c.dataset.word;
+      const text = c.dataset.speakAs || word;
       const opts = c.dataset.speakOpts ? JSON.parse(c.dataset.speakOpts) : {};
-      await speak(text, opts);
+      await playWord(word, text, opts);
       await new Promise((r) => setTimeout(r, 300));
     }
   });
 
   $("p2-hear-pic").addEventListener("click", () => {
     const q = QUESTIONS.part2[state.p2Index];
-    speak(q.pictureLabel || q.target);
+    playWord(q.target, q.pictureLabel || q.target, {});
   });
 
   $("btn-restart").addEventListener("click", () => {
