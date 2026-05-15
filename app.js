@@ -34,13 +34,14 @@
     if (!synth) return Promise.resolve();
     synth.cancel();
 
-    // Words ending in /p/ (sheep, cap, chop, lip, etc.) often have the final
-    // consonant clipped by TTS. Slow the rate and append a period (if not already
-    // punctuated) so the engine articulates the stop clearly.
+    // Words ending in /p/ (sheep, cap, chop, etc.) often have the final consonant
+    // clipped by TTS. Slow the rate and append a period (if not already punctuated)
+    // so the engine articulates the stop clearly. Caller can pass `noEmphasize: true`
+    // to opt out — for short words like "lip" the slowdown voices the /p/ into /b/.
     const trimmed = text.trim();
     const letters = trimmed.match(/[a-zA-Z]/g) || [];
     const lastLetter = (letters[letters.length - 1] || "").toLowerCase();
-    const endsInP = lastLetter === "p";
+    const endsInP = lastLetter === "p" && !opts.noEmphasize;
     const speakText = endsInP && !/[.!?,;:]$/.test(trimmed) ? trimmed + "." : text;
     const defaultRate = endsInP ? 0.7 : 0.85;
 
@@ -179,9 +180,10 @@
       sp.setAttribute("aria-label", `Hear ${opt.word}`);
       sp.addEventListener("click", (e) => {
         e.stopPropagation();
-        speak(opt.speakAs || opt.word);
+        speak(opt.speakAs || opt.word, opt.speakOpts || {});
       });
       card.dataset.speakAs = opt.speakAs || opt.word;
+      if (opt.speakOpts) card.dataset.speakOpts = JSON.stringify(opt.speakOpts);
       row.appendChild(sp);
       card.appendChild(row);
 
@@ -429,12 +431,16 @@
     renderPart2();
   });
 
-  $("p1-hear-all").addEventListener("click", () => {
+  $("p1-hear-all").addEventListener("click", async () => {
     const cards = document.querySelectorAll("#p1-options .option");
     // Speak whatever order they're currently rendered in, using each card's
-    // speakAs override (set in dataset) so e.g. "koosh" is pronounced correctly.
-    const order = Array.from(cards).map((c) => c.dataset.speakAs || c.dataset.word);
-    speakSequence(order);
+    // speakAs override and speakOpts (e.g. so "lip" skips the /p/ slowdown).
+    for (const c of cards) {
+      const text = c.dataset.speakAs || c.dataset.word;
+      const opts = c.dataset.speakOpts ? JSON.parse(c.dataset.speakOpts) : {};
+      await speak(text, opts);
+      await new Promise((r) => setTimeout(r, 300));
+    }
   });
 
   $("p2-hear-pic").addEventListener("click", () => {

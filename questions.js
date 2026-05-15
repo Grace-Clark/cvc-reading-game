@@ -65,17 +65,19 @@ const QUESTIONS = {
         { word: "fin",     image: "fin.png" },
         { word: "dish",    image: "dish.png" },
         // The `speakAs` field overrides what speech synthesis says when the default
-        // TTS pronunciation of `word` is wrong. "Kouche" leverages the TTS's learned
-        // pronunciation of "douche" (/duːʃ/) — same -ouche ending should give the
-        // long /uː/ vowel we want.
-        { word: "koosh", image: "koosh.png", speakAs: "kouche" }
+        // TTS pronunciation of `word` is wrong. Extra o's encourage the TTS to use
+        // the long /uː/ vowel (the "oo" sound in "boo" / "douche").
+        { word: "koosh", image: "koosh.png", speakAs: "koooosh" }
       ]
     },
     {
       target: "lid",
       options: [
         { word: "loud", image: "loud.png" },
-        { word: "lip", image: "lip.png" },
+        // Per-option speak overrides. `noEmphasize` skips the automatic /p/-ending
+        // slowdown — for short words like "lip" the slowdown makes the /p/ sound
+        // voiced (like "lib") instead of crisp.
+        { word: "lip", image: "lip.png", speakOpts: { noEmphasize: true } },
         { word: "lid",  image: "lid.png" },
         { word: "kid",  image: "kid.png" }
       ]
